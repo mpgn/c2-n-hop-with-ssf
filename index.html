@@ -29,13 +29,13 @@ p {
                 <h1>Sovling double hop with ssf - SOCKS/C2</h1>
 
                 <p class="justify">My solution to solve multiple hop using <a href="https://securesocketfunneling.github.io/ssf/#home">SSF</a>. First we start with three servers, imagine we want to reach the server 3 (192.168.152.102) from our Kali (192.168.133.156). We need to setup a socks tunnel between server 2 and our kali but we also want to execute your Empire agent on server2. Let's solve this situation !</p>
-                <div style="text-align: center;"><img src="G:\sdfsdf.png" alt="" class="centered"></div><br>
+                <div style="text-align: center;"><img src="sdfsdf.png" alt="" class="centered"></div><br>
 
                 <p><b>Note</b>: You need to have local administrator privilege on server 1 in order to allow connection on port 5000.</p>
 
                 <h5>Creating a remote SOCKS between Server 1 and Kali</h5>
 
-                <div style="text-align: center;"><img src="G:\sdfsdf (1).png" alt="" class="centered"></div><br>
+                <div style="text-align: center;"><img src="sdfsdf (1).png" alt="" class="centered"></div><br>
 
 
                 <p> First we start the ssd server on Kali:</p>
@@ -106,7 +106,7 @@ SMB         192.168.151.102 445    DESKTOP-BQC6FMA  [*] Windows 10.0 Build 19041
 <p><b>Note</b>: No need to be local admin for this part of course.</p>
                 <h5>Creating a remote SOCKS between Server 2 and Kali</h5>
 
-                <div style="text-align: center;"><img src="G:\sdfsdf (2).png" alt="" class="centered"></div><br>
+                <div style="text-align: center;"><img src="sdfsdf (2).png" alt="" class="centered"></div><br>
 
 <p>Now let's open a socks between server 2 and our Kali. First we open a ssf server on port 5000 on Server 1:</p>
 <pre style="font-size:11px">
@@ -190,7 +190,7 @@ SMB         192.168.152.102 445    MSEDGEWIN10      [*] Windows 10.0 Build 17763
 
                 <h5>Executing our Empire agent on Server 2</h5>
 
-                <div style="text-align: center;"><img src="G:\sdfsdf (3).png" alt="" class="centered"></div><br>
+                <div style="text-align: center;"><img src="sdfsdf (3).png" alt="" class="centered"></div><br>
 
                 <p>Now if you want to get your Empire agent running on Server 2 you need to create a new listener (notice the host 127.0.0.1)</p>
 <pre style="font-size:11px">
