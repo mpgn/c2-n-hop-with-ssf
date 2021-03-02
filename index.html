@@ -298,8 +298,16 @@
     
                     <h4>Creating a remote SOCKS between server n and Kali</h4>
                     <p>On each servers you need to run the command <code>ssfd.exe -p 5000</code>, you also need to open the port 5000 on the firewall to allow the connection meaning you need administrative privileges.</p>
-
-
+                    <p>Then modify the config.txt file regarding your path, example if we want to setup a socks on Server 3, the config look like this:</p>
+<pre style="font-size:11px">{
+    "ssf": {
+        "circuit": [
+            {"host": "192.168.152.101", "port":"5000"},
+            {"host": "192.168.151.101", "port":"5000"}
+        ]
+    }
+}
+</pre>
                     <footer class="section">
                         <div>
                           <p><a href="https://github.com/mpgn" target="_blank">GitHub</a> · <a href="https://twitter.com/mpgn_x64" target="_blank">Twitter</a></p>
